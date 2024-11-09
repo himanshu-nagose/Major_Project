@@ -27,7 +27,7 @@ The aim of this project is to design and implement an efficient precoding algori
 
 The system architecture integrates both analog and digital beamforming through hybrid beamforming. Machine learning algorithms, such as supervised learning and reinforcement learning, are employed to dynamically adjust the precoding matrix. This enhances the system's ability to adapt to changing channel conditions and optimize performance in real-time.
 
-![System Architecture](image)  
+<!-- ![System Architecture](image) -->  
 
 ## Advantages and Disadvantages
 
