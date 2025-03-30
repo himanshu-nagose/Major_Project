@@ -1,0 +1,33 @@
+% Step 2: Train Neural Network
+load('beamforming_dataset.mat');  % Load the dataset
+
+% Split data into training and validation sets
+num_train = round(0.8 * size(features, 1));
+X_train = features(1:num_train, :);
+Y_train = labels(1:num_train, :);
+X_val = features(num_train+1:end, :);
+Y_val = labels(num_train+1:end, :);
+
+% Create and train the neural network
+layers = [
+    featureInputLayer(size(X_train, 2))
+    fullyConnectedLayer(128)
+    reluLayer
+    fullyConnectedLayer(64)
+    reluLayer
+    fullyConnectedLayer(size(Y_train, 2))
+    regressionLayer
+];
+
+options = trainingOptions('adam', ...
+    'MaxEpochs', 50, ...
+    'MiniBatchSize', 32, ...
+    'InitialLearnRate', 0.001, ...
+    'ValidationData', {X_val, Y_val}, ...
+    'Plots', 'training-progress', ...
+    'Verbose', false);
+
+net = trainNetwork(X_train, Y_train, layers, options);
+
+% Save the trained model
+save('beamforming_model.mat', 'net');

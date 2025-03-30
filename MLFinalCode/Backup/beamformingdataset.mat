@@ -1,0 +1,47 @@
+% Step 1: Generate Training Data
+Nt = 64;
+NtRF = 4;
+Nr = 16;
+NrRF = 4;
+Ncl = 6; 
+Nray = 8; 
+Nscatter = Ncl * Nray;
+Ns = NtRF; % Number of data streams
+c = 3e8; 
+fc = 28e9; 
+lambda = c / fc;
+
+% Create Partitioned Arrays for Transmission and Reception
+txarray = phased.PartitionedArray(...
+    'Array', phased.URA([sqrt(Nt) sqrt(Nt)], lambda / 2), ...
+    'SubarraySelection', ones(NtRF, Nt), 'SubarraySteering', 'Custom');
+
+rxarray = phased.PartitionedArray(...
+    'Array', phased.URA([sqrt(Nr) sqrt(Nr)], lambda / 2), ...
+    'SubarraySelection', ones(NrRF, Nr), 'SubarraySteering', 'Custom');
+
+txpos = getElementPosition(txarray) / lambda;
+rxpos = getElementPosition(rxarray) / lambda;
+
+num_samples = 5000;  % Number of samples for dataset
+features = zeros(num_samples, 2 * Nscatter);  % Real and imaginary parts of g
+labels = zeros(num_samples, 2 * NtRF * NrRF); % Real and imaginary parts of optimal weights
+
+for i = 1:num_samples
+    % Channel realization
+    txang = [rand(1, Nscatter) * 60 - 30; rand(1, Nscatter) * 20 - 10];
+    rxang = [rand(1, Nscatter) * 180 - 90; rand(1, Nscatter) * 90 - 45];
+    g = (randn(1, Nscatter) + 1i * randn(1, Nscatter)) / sqrt(Nscatter);
+    H = scatteringchanmtx(txpos, rxpos, txang, rxang, g);
+    
+    % Compute optimal weights
+    [Fopt, ~] = helperOptimalHybridWeights(H, Ns, 1);  % Assuming SNR = 1
+    weights = Fopt(:);  % Flatten weights into a vector
+    
+    % Save features and labels
+    features(i, :) = [real(g), imag(g)];
+    labels(i, :) = [real(weights); imag(weights)];
+end
+
+% Save the dataset
+save('beamforming_dataset.mat', 'features', 'labels');
