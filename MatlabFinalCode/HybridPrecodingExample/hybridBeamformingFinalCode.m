@@ -1,8 +1,8 @@
 % Parameters for the beamforming and scattering channel
-Nt = 256;
-NtRF = 16;
-Nr = 64;
-NrRF = 16;
+Nt = 16;
+NtRF = 4;
+Nr = 16;
+NrRF = 4;
 rng(4096);
 c = 3e8;
 fc = 28e9;
